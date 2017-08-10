@@ -39,67 +39,67 @@ var mktChannel;
 var command = '!stats';
 
 module.exports={
-  command: command,
-  init: init,
-  respond: respond
+    command: command,
+    init: init,
+    respond: respond
 };
 
 function init(channel_) {
-  mktChannel = channel_;
-  if (!channel_) {
-    console.log('No market and trading channel. Statbot will only respond to DMs.');
-  }
+    mktChannel = channel_;
+    if (!channel_) {
+        console.log('No market and trading channel. Statbot will only respond to DMs.');
+    }
 
-  var currencies = Object.keys(options.currencies);
-  for (var i = 0; i < currencies.length; i++) {
-    cachedRates[currencies[i]] = { rate: 0, time: null };
-  }
+    var currencies = Object.keys(options.currencies);
+    for (var i = 0; i < currencies.length; i++) {
+        cachedRates[currencies[i]] = { rate: 0, time: null };
+    }
 }
 
 var globalSlackParams = {};
 
 function respond(bot, data) {
-  var channel = data.channel,
-      words = data.text.trim().split(' ').filter( function(n){return n !== "";} );
+    var channel = data.channel,
+    words = data.text.trim().split(' ').filter( function(n){return n !== "";} );
 
-  if (words[0] !== command || (channel != mktChannel && !channel.startsWith('D'))) {
-    // if the received message isn't starting with the trigger,
-    // or the channel is not the market-and-trading channel, nor sandbox, nor a DM -> ignore
-    return;
-  }
+    if (words[0] !== command || (channel != mktChannel && !channel.startsWith('D'))) {
+        // if the received message isn't starting with the trigger,
+        // or the channel is not the market-and-trading channel, nor sandbox, nor a DM -> ignore
+        return;
+    }
 
-  var currency = /*(words.length > 1) ? words[2].toUpperCase() :*/  options.defaultCurrency;
-  var amount = /*(words.length > 2) ? parseFloat(words[2], 10) :*/ 1;
-  var showHelp = (isNaN(amount)) || (Object.keys(options.currencies).indexOf(currency) === -1);
+    var currency = /*(words.length > 1) ? words[2].toUpperCase() :*/  options.defaultCurrency;
+    var amount = /*(words.length > 2) ? parseFloat(words[2], 10) :*/ 1;
+    var showHelp = (isNaN(amount)) || (Object.keys(options.currencies).indexOf(currency) === -1);
 
-  var moveToBotSandbox = showHelp && channel !== mktChannel && !channel.startsWith("D");
-  if (moveToBotSandbox) {
-    bot.postMessage(channel, 'Please use PM to talk to bot.', globalSlackParams);
-    return;
-  }
+    var moveToBotSandbox = showHelp && channel !== mktChannel && !channel.startsWith("D");
+    if (moveToBotSandbox) {
+        bot.postMessage(channel, 'Please use PM to talk to bot.', globalSlackParams);
+        return;
+    }
 
-  if (showHelp) {
-    doHelp(bot, channel);
-  } else {
+    if (showHelp) {
+        doHelp(bot, channel);
+    } else {
 
-    doSteps(bot, channel, 'ETH', amount);
-    doSteps(bot, channel, 'USD', amount);
-    doSteps(bot, channel, 'BTC', amount);
-    setTimeout(function() { marketstats(bot,channel); }, 250);
-    //marketstats(bot,channel);
-    //volume24(bot,channel); can't get this part to work, someone help me fix - i think it's because 24h_volume_usd starts with number
-  }
+        doSteps(bot, channel, 'ETH', amount);
+        doSteps(bot, channel, 'USD', amount);
+        doSteps(bot, channel, 'BTC', amount);
+        setTimeout(function() { marketstats(bot,channel); }, 250);
+        //marketstats(bot,channel);
+        //volume24(bot,channel); can't get this part to work, someone help me fix - i think it's because 24h_volume_usd starts with number
+    }
 }
 
 function doHelp(bot, channel) {
-  var message =
+    var message =
     '`' + command + '`: show the price of 1 DNT in ' + options.defaultCurrency + '\n' +
     '`' + command + ' help`: this message\n' +
     '`' + command + ' CURRENCY`: show the price of 1 DNT in CURRENCY. Supported values for CURRENCY are *btc* and *usd* (case-insensitive)\n' +
     '`' + command + ' CURRENCY AMOUNT`: show the price of AMOUNT DNT in CURRENCY\n';
 
     if (!channel.startsWith("D")) {
-      message =
+        message =
         '*USE PM FOR HELP*\n' +
         message +
         '\n' +
@@ -107,28 +107,28 @@ function doHelp(bot, channel) {
         'If I\'m not responding in some channel, you can invite me by @mentioning me.\n';
     }
 
-  bot.postMessage(channel, message, globalSlackParams);
+    bot.postMessage(channel, message, globalSlackParams);
 }
 
 function formatMessage(amount, rate, option) {
     var cur = option.sign;
     var value = numeral(rate.rate * amount).format('0,0[.][00000000]');
     if (option.sign == '$' || option.sign == '£'){
-      return '*' + numeral(amount).format('0,0[.][00000000]') + ' :dnt: = ' + cur +' '+ value + '*';
+        return '*' + numeral(amount).format('0,0[.][00000000]') + ' :dnt: = ' + cur +' '+ value + '*';
     }
     else {
-      return '*' + numeral(amount).format('0,0[.][00000000]') + ' :dnt: = ' + value + ' ' + cur + '*';
+        return '*' + numeral(amount).format('0,0[.][00000000]') + ' :dnt: = ' + value + ' ' + cur + '*';
     }
 }
 
 function icoprice(bot, channel, ico) {
-  ico = parseFloat(ico);
-  var message = '\n *' + 'ICO Price: 1 :dnt: = 0.0000719 ETH' + '* \n' + '*' +' Since ICO: '+ ico + 'x' + '*';
-  bot.postMessage(channel, message, {icon_emoji: ':district0x:'});
+    ico = parseFloat(ico);
+    var message = '\n *' + 'ICO Price: 1 :dnt: = 0.0000719 ETH' + '* \n' + '*' +' Since ICO: '+ ico + 'x' + '*';
+    bot.postMessage(channel, message, {icon_emoji: ':district0x:'});
 }
 
 function formaty(n, decimals, currency) {
-  n = parseFloat(n);
+    n = parseFloat(n);
     return currency + " " + n.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
 }
 
@@ -140,10 +140,10 @@ function doSteps(bot, channel, currency, amount) {
         var cache = cachedRates[currency];
         shouldReload = cache.time === null || moment().diff(cache.time) >= options.refreshTime;
         if (!shouldReload) {
-           if (option.sign == 'ETH') {
-            var coef = (cache.rate/0.0000719).toFixed(2);
-      icoprice(bot, channel, coef);
-    }
+            if (option.sign == 'ETH') {
+                var coef = (cache.rate/0.0000719).toFixed(2);
+                icoprice(bot, channel, coef);
+            }
             var message = formatMessage(amount, cache, option);
             bot.postMessage(channel, message, {icon_emoji: ':district0x:'});
         }
@@ -161,63 +161,39 @@ function doSteps(bot, channel, currency, amount) {
 }
 
 function marketstats(bot,channel) {
-        var statsurl='https://api.coinmarketcap.com/v1/ticker/district0x/';
+    var statsurl='https://api.coinmarketcap.com/v1/ticker/district0x/';
 
-        request.get(statsurl, function(error, response, body) {
-            if (error) {
-                bot.postMessage(channel, err.message ? err.message : 'The request could not be completed at this time. Please try again later.');
-                return;
-            }
-            var marketcap = 0;
-            var rank = 0;
-            try {
-                marketcap = jp.query(JSON.parse(body), '$[0].market_cap_usd');
-                if (Array.isArray(marketcap) && marketcap.length > 0) {
-                    marketcap = marketcap[0];
-                    marketcap = formaty(marketcap,2,'$')
-                    
-                }
-                
-                rank = jp.query(JSON.parse(body), '$[0].rank');
-                if (Array.isArray(rank) && rank.length > 0) {
-                    rank = rank[0];
-                }
+    request.get(statsurl, function(error, response, body) {
+        if (error) {
+            bot.postMessage(channel, err.message ? err.message : 'The request could not be completed at this time. Please try again later.');
+            return;
+        }
+        var marketcap = 0;
+        var rank = 0;
+        var volume24 = 0;
+        try {
 
-            } catch (ignored) {
-                // invalid response or pair rate
-            }
+            var bodyString = '' + body;
+            bodyString = bodyString.substring(1, bodyString.length -1);
 
-            var statmsg = '*'+'Rank: '+ rank +  '* \n *Marketcap: '+marketcap+'*\n';
+            //JSON needs to be parsed twice to remove erroneous quotation mark resulting from parsing
+            //'24h_volume_usd' the first time
+            var cleanJSON = JSON.parse(JSON.parse(JSON.stringify(bodyString)));
 
-                bot.postMessage(channel, statmsg, {icon_emoji: ':district0x:'});
-  
-        });
-}
+            //cleaner value extraction
+            volume24 = cleanJSON['24h_volume_usd'];
+            marketcap = formaty(cleanJSON['market_cap_usd'], 2, '$');
+            rank = cleanJSON['rank'];
 
-function volume24(bot,channel) {
-        var statsurl='https://api.coinmarketcap.com/v1/ticker/district0x/';
+        } catch (error) {
+            console.log(error);
+        }
 
-        request.get(statsurl, function(error, response, body) {
-            if (error) {
-                bot.postMessage(channel, err.message ? err.message : 'The request could not be completed at this time. Please try again later.');
-                return;
-            }
-            var volume24 = 0;
-            try {
-                volume24 = jp.query(JSON.parse(body),'$[0].24h_volume_usd');
-                if (Array.isArray(volume24) && volume24.length > 0) {
-                    volume24 = volume24[0];
-                }
+        var statmsg = '*'+'Rank: '+ rank +  '* \n *Marketcap: '+ marketcap +'*\n' + '*Volume: ' + volume24 + '* \n';
 
-            } catch (ignored) {
-                // invalid response or pair rate
-            }
+        bot.postMessage(channel, statmsg, {icon_emoji: ':district0x:'});
 
-            var statmsg = '*'+'Volume: $'+volume24+'*\n';
-
-                bot.postMessage(channel, statmsg, {icon_emoji: ':district0x:'});
-  
-        });
+    });
 }
 
 function processSteps(bot, channel, currency, rate, amount, steps, option) {
@@ -257,9 +233,9 @@ function processSteps(bot, channel, currency, rate, amount, steps, option) {
                 cachedRates[currency] = result;
 
                 if (option.sign == 'ETH') {
-            var coef = (result.rate/0.0000719).toFixed(2);
-      icoprice(bot, channel, coef);
-    }
+                    var coef = (result.rate/0.0000719).toFixed(2);
+                    icoprice(bot, channel, coef);
+                }
 
                 bot.postMessage(channel, formatMessage(amount, result, option), {icon_emoji: ':bulb:'});
             } else {
