@@ -181,7 +181,7 @@ function marketstats(bot,channel) {
             var cleanJSON = JSON.parse(JSON.parse(JSON.stringify(bodyString)));
 
             //cleaner value extraction
-            volume24 = cleanJSON['24h_volume_usd'];
+            volume24 = formaty(cleanJSON['24h_volume_usd'], 2, '$');
             marketcap = formaty(cleanJSON['market_cap_usd'], 2, '$');
             rank = cleanJSON['rank'];
 
