@@ -56,8 +56,7 @@ function fetchtx(bot,channel) {
   dis = [];
 
   return new Promise(function (resolve, reject) {
-var statsurl='http://api.etherscan.io/api?module=account&action=txlist&address=0x2643957A7fbb444755Ded8b3615fB54D648411eb&startblock=0&endblock=99999999&sort=asc&
-=&page=1&offset=10';
+var statsurl='http://api.etherscan.io/api?module=account&action=txlist&address=0x2643957A7fbb444755Ded8b3615fB54D648411eb&startblock=0&endblock=99999999&sort=asc&=&page=1&offset=10';
 
     request.get(statsurl, function(error, response, body) {
         if (error) {
