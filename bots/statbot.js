@@ -81,11 +81,12 @@ function respond(bot, data) {
     if (showHelp) {
         doHelp(bot, channel);
     } else {
-
+        bnb(bot, channel);
         doSteps(bot, channel, 'ETH', amount);
         doSteps(bot, channel, 'USD', amount);
         doSteps(bot, channel, 'BTC', amount);
         setTimeout(function() { marketstats(bot,channel); }, 250);
+
         //marketstats(bot,channel);
         //volume24(bot,channel); can't get this part to work, someone help me fix - i think it's because 24h_volume_usd starts with number
     }
@@ -190,6 +191,40 @@ function marketstats(bot,channel) {
         }
 
         var statmsg = '*'+'Rank: '+ rank +  '* \n *Marketcap: '+ marketcap +'*\n' + '*Volume: ' + volume24 + '* \n';
+
+        bot.postMessage(channel, statmsg, {icon_emoji: ':district0x:'});
+
+    });
+}
+
+function bnb(bot,channel) {
+    var statsurl='https://www.binance.com/api/v1/ticker/24hr?symbol=DNTETH';
+
+    request.get(statsurl, function(error, response, body) {
+        if (error) {
+            bot.postMessage(channel, err.message ? err.message : 'The request could not be completed at this time. Please try again later.');
+            return;
+        }
+
+        var pricebnb = 0;
+        try {
+
+            //var bodyString = '' + body;
+            //bodyString = bodyString.substring(1, bodyString.length -1);
+
+            //JSON needs to be parsed twice to remove erroneous quotation mark resulting from parsing
+            //'24h_volume_usd' the first time
+            var cleanJSON = JSON.parse(body);
+
+            //cleaner value extraction
+            //pricebnb = formaty(cleanJSON['lastPrice'], 2, '$');
+            pricebnb = cleanJSON['lastPrice'];
+
+        } catch (error) {
+            console.log(error);
+        }
+
+        var statmsg = '*'+'Binance Price: '+ pricebnb +  '* \n';
 
         bot.postMessage(channel, statmsg, {icon_emoji: ':district0x:'});
 
